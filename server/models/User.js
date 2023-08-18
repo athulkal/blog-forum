@@ -36,9 +36,6 @@ User.init(
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    category: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-    },
   },
   {
     sequelize,

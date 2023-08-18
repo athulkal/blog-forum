@@ -1,18 +1,22 @@
 const { getUser } = require('../utils/middlewares')
-const { Blog, Comment } = require('../models')
+const { Blog, Comment, Tags } = require('../models')
 const blogsRouter = require('express').Router()
 
 blogsRouter.post('/', getUser, async (req, res, next) => {
   console.log(req.loggedInUser)
   if (('testing from blogs router', req.loggedInUser)) {
     try {
-      const { title, description, category } = req.body
+      const { title, description, Tags } = req.body
       console.log(req.body)
       const blog = await Blog.create({
         title,
         description,
-        category,
         userId: req.loggedInUser,
+        Tags: [
+          {
+            name: Tags,
+          },
+        ],
       })
       console.log('this is happening or no at blog router', blog)
       res.status(201).json(blog)
@@ -103,18 +107,7 @@ blogsRouter.get('/', async (req, res) => {
 // on getting should we use timestamps or use a date for as a seperate property
 blogsRouter.get('/:id', async (req, res) => {
   const blog = await Blog.findByPk(req.params.id, {
-    include: [
-      {
-        model: Comment,
-        as: 'Comments',
-        include: [
-          {
-            model: Comment,
-            as: 'replies',
-          },
-        ],
-      },
-    ],
+    include: Tags,
   })
   /// we need to do a recursive query to get the hierarchial comment structure
   res.status(200).json(blog)

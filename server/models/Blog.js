@@ -18,10 +18,6 @@ Blog.init(
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    category: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: false,
-    },
     likes: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
