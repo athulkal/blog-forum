@@ -23,6 +23,9 @@ Tags.init(
       beforeCreate: (tag) => {
         tag.id = uuidv4()
       },
+      beforeBulkCreate: (tags) => {
+        tags.forEach((tag) => (tag.id = uuidv4()))
+      },
     },
   }
 )

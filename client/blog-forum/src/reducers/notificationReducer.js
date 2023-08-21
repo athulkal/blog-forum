@@ -8,19 +8,19 @@ const notificationSlice = createSlice({
   },
   reducers: {
     setNotification(state, action) {
-      console.log(state);
-      return (state = action.payload);
+      return (state = { ...state, ...action.payload });
     },
   },
 });
 
 export const { setNotification } = notificationSlice.actions;
 
+// using redux thunks
+
 export const updateNotification = (message, type, time) => {
   return async (dispatch) => {
-    console.log(message);
     dispatch(setNotification({ message, type }));
-    setTimeout(() => {
+    setTimeout(async () => {
       dispatch(setNotification({ message: null, type: "" }));
     }, time * 1000);
   };

@@ -1,6 +1,6 @@
 import React from "react";
 
-const Notification = ({ type, message }) => {
+const Notification = ({ message, type }) => {
   let notificationClasses = "p-4 rounded-md shadow-md ";
   let iconClasses = "";
 

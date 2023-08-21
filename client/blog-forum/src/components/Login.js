@@ -1,15 +1,18 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getUser } from "../reducers/userReducer";
-import { updateNotification } from "../reducers/notificationReducer";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const error = useSelector((state) => state.user.error);
+  const userStatus = useSelector((state) => state.user.status);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  console.log(error);
+  console.log(userStatus);
   const handleEmailChange = (e) => {
     console.log(e.target.value);
     setEmail(e.target.value);
@@ -18,18 +21,16 @@ const Login = () => {
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
   };
-
-  const handleLogin = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault();
-    try {
-      const user = await dispatch(getUser({ email, password }));
-      dispatch(updateNotification("Logged in successfully", "success", 10));
-      setEmail("");
-      setPassword("");
-      navigate("/");
-    } catch (err) {
-      console.log(err);
-    }
+    dispatch(getUser({ email, password }))
+      .unwrap()
+      .then(() => {
+        navigate("/choose-topics");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   return (

@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { updateNotification } from "./notificationReducer";
 import axios from "axios";
 
 const initialState = {
@@ -16,11 +17,10 @@ const userSlice = createSlice({
       state.status = "pending";
     });
     builder.addCase(getUser.fulfilled, (state, action) => {
-      state.user = action.payload;
       state.status = "success";
+      state.user = action.payload;
     });
     builder.addCase(getUser.rejected, (state, action) => {
-      console.log(action.payload);
       state.status = "failed";
       state.error = action.payload;
     });
@@ -29,16 +29,18 @@ const userSlice = createSlice({
 
 export const getUser = createAsyncThunk(
   "user/getUser",
-  async (credentials, { rejectWithValue }) => {
+  async (credentials, { rejectWithValue, dispatch }) => {
     try {
       const response = await axios.post(
         "http://localhost:3001/login",
         credentials,
         { withCredentials: true }
       );
-      console.log(response);
+      dispatch(updateNotification("Logged in successfully", "success", 10));
+      console.log(response.data);
       return response.data;
     } catch (err) {
+      dispatch(updateNotification(err.response.data.error, "error", 10));
       return rejectWithValue(err.response.data.error);
     }
   }

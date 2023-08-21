@@ -4,8 +4,8 @@ const { User } = require('../models')
 
 confirmation.get('/:id', async (req, res) => {
   try {
-    console.log('what is happening here ? ')
     const id = req.params.id
+    console.log(id)
     const userId = await redis.get(id)
     const user = await User.findByPk(userId)
     await user.update({ confirmed: true })

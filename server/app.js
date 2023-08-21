@@ -19,6 +19,7 @@ const { Strategy } = require('passport-twitter')
 const blogsRouter = require('./controllers/blogs')
 const rateLimit = require('express-rate-limit')
 const path = require('path')
+const tagsRouter = require('./controllers/topics')
 
 const app = express()
 connection()
@@ -42,7 +43,7 @@ app.use(
     origin: 'http://localhost:3000',
   })
 )
-app.use(limiter)
+// app.use(limiter)
 
 app.use(
   session({
@@ -121,6 +122,7 @@ app.use('/resetPassword', resetPasswordRouter)
 app.use('/login', loginRouter)
 app.use('/logout', logoutRouter)
 app.use('/api/blogs', blogsRouter)
+app.use('/api/tags', tagsRouter)
 
 app.use(errorHandler)
 

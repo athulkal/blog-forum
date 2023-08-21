@@ -2,12 +2,13 @@ const login = require('express').Router()
 
 const { User, Profile } = require('../models')
 
-login.post('/', async (req, res) => {
+login.post('/', async (req, res, next) => {
   try {
     const { email, password } = req.body
     const user = await User.findOne({
       where: { email: email },
     })
+    console.log(user)
     if (!user) {
       res.status(400).json({ error: 'Please enter valid credentials' })
     }
@@ -29,6 +30,7 @@ login.post('/', async (req, res) => {
       res.status(400).json({ error: 'Please enter valid credentials' })
     }
   } catch (err) {
+    next(err)
     console.log(err)
   }
 })

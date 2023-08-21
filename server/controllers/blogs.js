@@ -6,18 +6,25 @@ blogsRouter.post('/', getUser, async (req, res, next) => {
   console.log(req.loggedInUser)
   if (('testing from blogs router', req.loggedInUser)) {
     try {
-      const { title, description, Tags } = req.body
+      const { title, description, tagNames } = req.body
       console.log(req.body)
+      const tagInstances = []
+
+      for (let tag of tagNames) {
+        tagInstances.push({ name: tag })
+      }
+
       const blog = await Blog.create({
         title,
         description,
         userId: req.loggedInUser,
-        Tags: [
-          {
-            name: Tags,
-          },
-        ],
       })
+
+      const tags = await Tags.bulkCreate(tagInstances)
+      console.log(tags)
+
+      await blog.addTags(tags)
+
       console.log('this is happening or no at blog router', blog)
       res.status(201).json(blog)
     } catch (error) {
