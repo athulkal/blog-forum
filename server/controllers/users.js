@@ -1,5 +1,5 @@
 const userController = require('express').Router()
-const { User, Follower, Following, Profile } = require('../models')
+const { User, Follower, Following, Profile, Tags } = require('../models')
 const createConfirmLink = require('../utils/createConfirm')
 const { getUser } = require('../utils/middlewares')
 const redis = require('../utils/redis')
@@ -7,7 +7,9 @@ const sendEmail = require('../utils/sendEmail')
 const path = require('path')
 const multer = require('multer')
 const fs = require('fs')
+const { Op } = require('sequelize')
 
+// setting up store for multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const destinationPath = path.resolve(__dirname, '..', 'images')
@@ -19,9 +21,10 @@ const storage = multer.diskStorage({
     cb(null, Date.now() + path.extname(file.originalname))
   },
 })
-
+// setting up multer middleware
 const upload = multer({ storage: storage })
 
+// route for getting all users
 userController.get('/', async (req, res) => {
   try {
     const users = await User.findAll({
@@ -40,7 +43,23 @@ userController.get('/', async (req, res) => {
     console.log(err)
   }
 })
+// getting logged in user
+userController.get('/loggedInUser', getUser, async (req, res) => {
+  console.log(req.loggedInUser)
+  if (req.loggedInUser) {
+    const user = await User.findByPk(req.loggedInUser, {
+      attributes: { exclude: ['password,twitterId', 'confirmed'] },
+      include: {
+        model: Profile,
+      },
+    })
+    res.status(200).json(user)
+  } else {
+    res.status(400).json({ error: 'Please login' })
+  }
+})
 
+// registration of a user
 userController.post('/', async (req, res, next) => {
   const { email, password, name } = req.body
   if (email && password && name) {
@@ -80,7 +99,21 @@ userController.get('/:id', getUser, async (req, res) => {
   })
   res.status(200).json(user)
 })
+/// Adding selected topics to the User
+userController.patch('/:id', async (req, res) => {
+  const { tags } = req.body
+  const user = await User.findByPk(req.params.id, {
+    attributes: { exclude: ['password'] },
+    include: [{ model: Profile }, { model: Tags }],
+  })
 
+  const findTags = await Tags.findAll({ where: { name: { [Op.in]: tags } } })
+  await user.addTags(findTags)
+  console.log(findTags)
+  res.status(201).json(user)
+})
+
+// user profile bio edit
 userController.patch(
   '/:id/profile',
   upload.single('image'),
@@ -107,6 +140,7 @@ userController.patch(
   }
 )
 
+// user following
 userController.post('/:id', getUser, async (req, res) => {
   let isFollowing
   // getting the user to follow from the req.params

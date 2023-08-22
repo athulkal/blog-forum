@@ -6,9 +6,17 @@ import Notification from "./components/Notification";
 import Profile from "./components/Profile";
 import ChooseTopics from "./components/ChooseTopics";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { getLoggedInUser } from "./reducers/userReducer";
 
 function App() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getLoggedInUser());
+  }, [dispatch]);
+
   const notification = useSelector((state) => state.notification.message);
   const notificationState = useSelector((state) => state.notification.type);
   const user = useSelector((state) => state.user.user);

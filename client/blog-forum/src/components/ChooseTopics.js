@@ -1,34 +1,39 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import topicService from "../services/chooseTopics";
+import { useNavigate } from "react-router-dom";
+import { getTopics, toggleSelection } from "../reducers/topicReducer";
 
 /*
-        THIS IS DONE DONE 
+  THIS IS DONE DONE 
 what this section has to be done is we need a container like a whole box and inside each topic will be a small
 box container with the which changes on select to green to indicate the topic selected and there will be a submit
 button which will send a post request to the backend which will update the user's data on which topics he selected
     REFATOR THIS TO USE REDUX => next step
+    1. refactor to redux store 
+    2. change the backend code to include the topics into user 
 */
 
 const ChooseTopics = () => {
-  const [topics, setTopics] = useState([]);
+  const user = useSelector((state) => state.user.user);
+  const topics = useSelector((state) => state.topics.tags);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    axios.get("http://localhost:3001/api/tags").then((res) => {
-      setTopics(res.data.map((topic) => ({ ...topic, selected: false })));
-    });
+    dispatch(getTopics());
   }, []);
 
-  const toggleSelection = (id) => {
-    setTopics((prevTopic) =>
-      prevTopic.map((topic) =>
-        topic.id === id ? { ...topic, selected: !topic.selected } : topic
-      )
-    );
+  const handleToggling = (id) => {
+    dispatch(toggleSelection(id));
   };
 
-  const handleTopicSelection = () => {
+  const handleTopicSelection = async () => {
     const selectedTopics = topics.filter((topic) => topic.selected);
-    console.log(selectedTopics);
+    const selectedTopicNames = selectedTopics.map((topic) => topic.name);
+    console.log(selectedTopicNames);
+    await topicService.addTopics(user.id, selectedTopicNames);
+    navigate("/");
   };
 
   return (
@@ -43,7 +48,7 @@ const ChooseTopics = () => {
                 ? "bg-zinc-900 text-white"
                 : "bg-gray-200 text-black"
             }`}
-            onClick={() => toggleSelection(topic.id)}
+            onClick={() => handleToggling(topic.id)}
           >
             {topic.name}
           </div>
