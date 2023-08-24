@@ -1,5 +1,13 @@
 const { getUser } = require('../utils/middlewares')
-const { Blog, Comment, Tags } = require('../models')
+const {
+  User,
+  Blog,
+  Following,
+  Tags,
+  TagsUsers,
+  TagsBlogs,
+  Follower,
+} = require('../models')
 const blogsRouter = require('express').Router()
 
 blogsRouter.post('/', getUser, async (req, res, next) => {
@@ -95,20 +103,51 @@ blogsRouter.patch('/:id', async (req, res) => {
   res.status(201).json(blog)
 })
 
+// Fetching all the blogs
+
 blogsRouter.get('/', async (req, res) => {
   try {
     // @todo fix the include on the blog
     const blogs = await Blog.findAll({
-      include: {
-        model: Comment,
-        nested: true,
-        attributes: { exclude: ['password'] },
-      },
+      include: [
+        {
+          model: User,
+          attributes: {
+            exclude: ['password', 'twitterId', 'confirmed', 'email'],
+          },
+        },
+        {
+          model: Tags,
+        },
+      ],
     })
     res.status(200).json(blogs)
   } catch (err) {
     console.log(err)
   }
+})
+// for the feed
+// blogsRouter.get('/:tagId', getUser, async (req, res) => {
+//   const recommendedBlog = await Blog.findAll({
+//     include: [{ model: Tags, where: { id: req.params.tagId } }],
+//   })
+//   res.status(200).json(recommendedBlog)
+// })
+
+// this is how we can get the post of the followers
+blogsRouter.get('/:userId', getUser, async (req, res) => {
+  let followersId = []
+  const user = await User.findByPk(req.params.userId, {
+    include: {
+      model: Following,
+    },
+  })
+  user.Followings.forEach((follower) => followersId.push(follower.followingId))
+
+  const blogs = await Blog.findAll({
+    where: { userId: followersId },
+  })
+  res.status(200).json(blogs)
 })
 
 // on getting should we use timestamps or use a date for as a seperate property

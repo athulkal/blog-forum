@@ -22,8 +22,11 @@ const path = require('path')
 const tagsRouter = require('./controllers/topics')
 
 const app = express()
+
+//testing DB
 connection()
 
+//Rate-limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -34,17 +37,21 @@ const limiter = rateLimit({
 const redisStore = new RedisStore({
   client: redis,
 })
-
+// serving statics files
 app.use(express.static(path.join(__dirname, 'images')))
+// for parsing req.body
 app.use(express.json())
+// for cross origing referencing
 app.use(
   cors({
     credentials: true,
     origin: 'http://localhost:3000',
   })
 )
+// rate limiter
 // app.use(limiter)
 
+// session middleware
 app.use(
   session({
     store: redisStore,
@@ -59,7 +66,6 @@ app.use(
     },
   })
 )
-
 // twitter Oauth
 passport.use(
   new Strategy(

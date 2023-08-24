@@ -75,4 +75,6 @@ module.exports = {
   Profile,
   Tags,
   ReadingList,
+  TagsUsers,
+  TagsBlogs,
 }

@@ -8,6 +8,7 @@ const initialState = {
   user: null,
   status: "idle",
   error: null,
+  loggedInUser: null,
 };
 
 const userSlice = createSlice({
@@ -27,7 +28,8 @@ const userSlice = createSlice({
       state.error = action.payload;
     });
     builder.addCase(getLoggedInUser.fulfilled, (state, action) => {
-      state.user = action.payload;
+      console.log(action.payload);
+      state.loggedInUser = action.payload;
     });
   },
 });
@@ -36,7 +38,9 @@ export const getUser = createAsyncThunk(
   "user/getUser",
   async (credentials, { rejectWithValue, dispatch }) => {
     try {
-      const response = await axios.post(`${baseUrl}/login`, credentials);
+      const response = await axios.post(`${baseUrl}/login`, credentials, {
+        withCredentials: true,
+      });
       dispatch(updateNotification("Logged in successfully", "success", 10));
       console.log(response.data);
       return response.data;
@@ -54,6 +58,7 @@ export const getLoggedInUser = createAsyncThunk(
       const response = await axios.get(`${baseUrl}/api/users/loggedInUser`, {
         withCredentials: true,
       });
+      console.log(response.data);
       return response.data;
     } catch (err) {
       console.log(err);

@@ -20,7 +20,7 @@ login.post('/', async (req, res, next) => {
       req.session.userId = user.id
       const loggedInUser = await User.findOne({
         where: { email: email },
-        attributes: { exclude: ['password,twitterId'] },
+        attributes: { exclude: ['password', 'twitterId'] },
         include: {
           model: Profile,
         },
