@@ -1,6 +1,6 @@
 const login = require('express').Router()
 
-const { User, Profile } = require('../models')
+const { User, Profile, Tags } = require('../models')
 
 login.post('/', async (req, res, next) => {
   try {
@@ -21,9 +21,7 @@ login.post('/', async (req, res, next) => {
       const loggedInUser = await User.findOne({
         where: { email: email },
         attributes: { exclude: ['password', 'twitterId'] },
-        include: {
-          model: Profile,
-        },
+        include: [{ model: Profile }, { model: Tags }],
       })
       res.status(200).json(loggedInUser)
     } else {

@@ -8,6 +8,7 @@ const {
   TagsBlogs,
   Follower,
 } = require('../models')
+const { Op } = require('sequelize')
 const blogsRouter = require('express').Router()
 
 blogsRouter.post('/', getUser, async (req, res, next) => {
@@ -16,11 +17,6 @@ blogsRouter.post('/', getUser, async (req, res, next) => {
     try {
       const { title, description, tagNames } = req.body
       console.log(req.body)
-      const tagInstances = []
-
-      for (let tag of tagNames) {
-        tagInstances.push({ name: tag })
-      }
 
       const blog = await Blog.create({
         title,
@@ -28,12 +24,14 @@ blogsRouter.post('/', getUser, async (req, res, next) => {
         userId: req.loggedInUser,
       })
 
-      const tags = await Tags.bulkCreate(tagInstances)
+      const tags = await Tags.findAll({
+        where: { name: { [Op.in]: tagNames } },
+      })
       console.log(tags)
 
       await blog.addTags(tags)
 
-      console.log('this is happening or no at blog router', blog)
+      // console.log('this is happening or no at blog router', blog)
       res.status(201).json(blog)
     } catch (error) {
       console.log(error)
@@ -105,39 +103,43 @@ blogsRouter.patch('/:id', async (req, res) => {
 
 // Fetching all the blogs
 
-blogsRouter.get('/', async (req, res) => {
-  try {
-    // @todo fix the include on the blog
-    const blogs = await Blog.findAll({
-      include: [
-        {
-          model: User,
-          attributes: {
-            exclude: ['password', 'twitterId', 'confirmed', 'email'],
-          },
-        },
-        {
-          model: Tags,
-        },
-      ],
-    })
-    res.status(200).json(blogs)
-  } catch (err) {
-    console.log(err)
-  }
-})
-// for the feed
-// blogsRouter.get('/:tagId', getUser, async (req, res) => {
-//   const recommendedBlog = await Blog.findAll({
-//     include: [{ model: Tags, where: { id: req.params.tagId } }],
-//   })
-//   res.status(200).json(recommendedBlog)
+// blogsRouter.get('/', getUser, async (req, res) => {
+//   try {
+//     // @todo fix the include on the blog
+//     const blogs = await Blog.findAll({
+//       include: [
+//         {
+//           model: User,
+//           attributes: {
+//             exclude: ['password', 'twitterId', 'confirmed', 'email'],
+//           },
+//         },
+//         {
+//           model: Tags,
+//         },
+//       ],
+//     })
+//     res.status(200).json(blogs)
+//   } catch (err) {
+//     console.log(err)
+//   }
 // })
+// for the feed
+blogsRouter.get('/:tagId', getUser, async (req, res) => {
+  const recommendedBlog = await Blog.findAll({
+    include: [
+      { model: User },
+      { model: Tags, where: { id: req.params.tagId } },
+    ],
+  })
+  res.status(200).json(recommendedBlog)
+})
 
 // this is how we can get the post of the followers
-blogsRouter.get('/:userId', getUser, async (req, res) => {
+blogsRouter.get('/', getUser, async (req, res) => {
   let followersId = []
-  const user = await User.findByPk(req.params.userId, {
+  console.log(req.loggedInUser)
+  const user = await User.findByPk(req.loggedInUser, {
     include: {
       model: Following,
     },
@@ -146,6 +148,15 @@ blogsRouter.get('/:userId', getUser, async (req, res) => {
 
   const blogs = await Blog.findAll({
     where: { userId: followersId },
+    include: [
+      {
+        model: User,
+        attributes: {
+          exclude: ['password', 'twitterId', 'confirmed', 'email'],
+        },
+      },
+      { model: Tags },
+    ],
   })
   res.status(200).json(blogs)
 })
@@ -155,7 +166,6 @@ blogsRouter.get('/:id', async (req, res) => {
   const blog = await Blog.findByPk(req.params.id, {
     include: Tags,
   })
-  /// we need to do a recursive query to get the hierarchial comment structure
   res.status(200).json(blog)
 })
 

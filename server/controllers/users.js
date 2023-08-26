@@ -49,9 +49,7 @@ userController.get('/loggedInUser', getUser, async (req, res) => {
   if (req.loggedInUser) {
     const user = await User.findByPk(req.loggedInUser, {
       attributes: { exclude: ['password,twitterId', 'confirmed'] },
-      include: {
-        model: Profile,
-      },
+      include: [{ model: Profile }, { model: Tags }],
     })
     res.status(200).json(user)
   } else {
@@ -141,6 +139,7 @@ userController.patch(
 )
 
 // user following
+
 userController.post('/:id', getUser, async (req, res) => {
   let isFollowing
   // getting the user to follow from the req.params

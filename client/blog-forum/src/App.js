@@ -20,7 +20,7 @@ function App() {
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(getLoggedInUser());
-  }, [user]);
+  }, []);
 
   console.log("no log coming from here", notification);
   console.log(user);

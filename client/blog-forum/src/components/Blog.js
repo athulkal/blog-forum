@@ -32,7 +32,7 @@ const Blog = () => {
             </div>
           </div>
           <div className="text-sm text-gray-800 mb-2">
-            {blog.description.substring(0, 100)}...
+            {blog.description.substring(0, 200)}...
           </div>
           <div className="flex flex-wrap">
             {blog.Tags.map((tag) => (
