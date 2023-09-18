@@ -4,7 +4,7 @@ import { getBlogs } from "../reducers/blogReducer";
 import { getLoggedInUser } from "../reducers/userReducer";
 import Categories from "./Categories";
 
-const Blog = () => {
+const Blog = ({ className }) => {
   const blogs = useSelector((state) => state.blogs.blogs);
   const dispatch = useDispatch();
   useEffect(() => {
@@ -16,7 +16,7 @@ const Blog = () => {
   const dateOptions = { month: "long", day: "numeric" };
 
   return (
-    <div className="mx-4 md:mx-64 mt-8 md:border-r-2 p-4">
+    <div className={`${className} mx-4 mt-8 md:border-r-2 p-4`}>
       {blogs.map((blog) => (
         <div
           className="h-auto md:h-48 border-b-2 border-gray-200 mb-2 cursor-pointer p-2"

@@ -7,7 +7,12 @@ const Home = () => {
     <div>
       <Header />
       <Categories />
-      <Blog />
+      <div className="flex w-full">
+        <Blog className="w-6/10" />
+        <div className="w-4/10">
+          <div className="p-32">gibberish</div>
+        </div>
+      </div>
     </div>
   );
 };
